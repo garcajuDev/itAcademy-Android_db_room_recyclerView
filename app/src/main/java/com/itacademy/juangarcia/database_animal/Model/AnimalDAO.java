@@ -5,6 +5,7 @@ import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.Update;
 
 import java.util.List;
 
@@ -13,6 +14,9 @@ public interface AnimalDAO {
 
     @Insert
     void insert(Animal animal);
+
+    @Update
+    void update(Animal animal);
 
     @Query("select * from animal_table")
     LiveData<List<Animal>> getAllAnmals();

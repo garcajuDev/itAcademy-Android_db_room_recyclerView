@@ -29,8 +29,16 @@ public class AnimalViewModel extends AndroidViewModel {
         repository.insert(animal);
     }
 
+    public void update(Animal animal){
+        repository.update(animal);
+    }
+
     public void delete(Animal animal){
         repository.delete(animal);
+    }
+
+    public void deleteAll(){
+        repository.deleteAll();
     }
 
 

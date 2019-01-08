@@ -19,6 +19,8 @@ import com.itacademy.juangarcia.database_animal.R;
 import java.util.Calendar;
 
 public class AddAnimalActivity extends AppCompatActivity {
+    public static final String KEY_ID =
+            "com.itacademy.juangarcia.database_animal.View.KEY_ID";
     public static final String KEY_NAME =
             "com.itacademy.juangarcia.database_animal.View.KEY_NAME";
     public static final String KEY_TYPE =
@@ -43,7 +45,21 @@ public class AddAnimalActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_animal);
 
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
-        setTitle("Regist Animal");
+
+        Intent intentFromAnimalInfoActivity = getIntent();
+        if (intentFromAnimalInfoActivity.hasExtra(KEY_ID)) {
+            setTitle("Edit Animal");
+            textViewName.setText(intentFromAnimalInfoActivity.getStringExtra(KEY_NAME));
+            textViewType.setText(intentFromAnimalInfoActivity.getStringExtra(KEY_TYPE));
+            textViewAge.setText(String.valueOf(intentFromAnimalInfoActivity
+                    .getStringExtra(KEY_AGE)));
+            textViewDate.setText(intentFromAnimalInfoActivity.getStringExtra(KEY_DATE));
+            checkBoxChip.setChecked(intentFromAnimalInfoActivity
+                    .getBooleanExtra(KEY_CHIP, false));
+        } else {
+            setTitle("Regist Animal");
+        }
+
 
         textViewName = findViewById(R.id.txtName);
         textViewType = findViewById(R.id.txtType);
@@ -78,6 +94,11 @@ public class AddAnimalActivity extends AppCompatActivity {
         data.putExtra(KEY_DATE, animalDate);
         data.putExtra(KEY_PHOTO, photo);
         data.putExtra(KEY_CHIP, chip);
+
+        int id = getIntent().getIntExtra("id", -1);
+        if (id != -1){
+            data.putExtra(KEY_ID, id);
+        }
 
         setResult(RESULT_OK, data);
         finish();

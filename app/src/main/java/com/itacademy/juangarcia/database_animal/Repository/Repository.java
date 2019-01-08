@@ -29,6 +29,10 @@ public class Repository {
         new insertAsyncTask(dao).execute(animal);
     }
 
+    public void update (Animal animal){
+        new updateAsyncTask(dao).execute(animal);
+    }
+
     public void delete (Animal animal){
         new deleteAsyncTask(dao).execute(animal);
     }
@@ -46,6 +50,21 @@ public class Repository {
         @Override
         protected Void doInBackground(final Animal... params) {
             asyncTaksDao.insert(params[0]);
+            return null;
+        }
+    }
+
+    private static class updateAsyncTask extends AsyncTask<Animal, Void, Void> {
+
+        private AnimalDAO asyncTaksDao;
+
+        updateAsyncTask(AnimalDAO animalDao){
+            asyncTaksDao = animalDao;
+        }
+
+        @Override
+        protected Void doInBackground(final Animal... params) {
+            asyncTaksDao.update(params[0]);
             return null;
         }
     }
