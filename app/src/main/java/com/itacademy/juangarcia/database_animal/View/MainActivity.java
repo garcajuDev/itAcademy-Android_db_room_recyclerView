@@ -124,12 +124,13 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "animal saved!", Toast.LENGTH_LONG).show();
         } else if (requestCode == EDIT_ANIMAL_REQUEST && resultCode == RESULT_OK){
             int id = data.getIntExtra(AddAnimalActivity.KEY_ID, -1);
-
+            System.out.println(""+id);
             if (id == -1) {
                 Toast.makeText(this, "Animal can't be updated!", Toast.LENGTH_SHORT).show();
                 return;
             }
             String name = data.getStringExtra(AddAnimalActivity.KEY_NAME);
+            System.out.println(name);
             String type = data.getStringExtra(AddAnimalActivity.KEY_TYPE);
             int age = data.getIntExtra(AddAnimalActivity.KEY_AGE, 1);
             String date = data.getStringExtra(AddAnimalActivity.KEY_DATE);

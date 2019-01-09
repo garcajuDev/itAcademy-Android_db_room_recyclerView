@@ -21,17 +21,13 @@ public class AnimalViewModel extends AndroidViewModel {
         allAnimals = repository.getAllAnimals();
     }
 
-    public LiveData<List<Animal>> getAllAnimals(){
-        return allAnimals;
-    }
+    public LiveData<List<Animal>> getAllAnimals(){ return allAnimals; }
 
-    public void insert(Animal animal){
-        repository.insert(animal);
-    }
+    public Animal getAnimal(int id) { return repository.getAnimal(id); }
 
-    public void update(Animal animal){
-        repository.update(animal);
-    }
+    public void insert(Animal animal){ repository.insert(animal); }
+
+    public void update(Animal animal){ repository.update(animal); }
 
     public void delete(Animal animal){
         repository.delete(animal);

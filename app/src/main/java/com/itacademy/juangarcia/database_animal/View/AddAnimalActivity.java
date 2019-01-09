@@ -1,6 +1,8 @@
 package com.itacademy.juangarcia.database_animal.View;
 
 import android.app.DatePickerDialog;
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -14,9 +16,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.itacademy.juangarcia.database_animal.Model.Animal;
 import com.itacademy.juangarcia.database_animal.R;
+import com.itacademy.juangarcia.database_animal.ViewModel.AnimalViewModel;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 public class AddAnimalActivity extends AppCompatActivity {
     public static final String KEY_ID =
@@ -34,6 +40,7 @@ public class AddAnimalActivity extends AppCompatActivity {
     public static final String KEY_CHIP =
             "com.itacademy.juangarcia.database_animal.View.KEY_CHIP";
 
+    AnimalViewModel animalViewModel;
     TextView textViewName, textViewType, textViewAge, textViewDate;
     CheckBox checkBoxChip;
     ImageView imageViewPhoto;
@@ -46,27 +53,74 @@ public class AddAnimalActivity extends AppCompatActivity {
 
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
 
-        Intent intentFromAnimalInfoActivity = getIntent();
-        if (intentFromAnimalInfoActivity.hasExtra(KEY_ID)) {
-            setTitle("Edit Animal");
-            textViewName.setText(intentFromAnimalInfoActivity.getStringExtra(KEY_NAME));
-            textViewType.setText(intentFromAnimalInfoActivity.getStringExtra(KEY_TYPE));
-            textViewAge.setText(String.valueOf(intentFromAnimalInfoActivity
-                    .getStringExtra(KEY_AGE)));
-            textViewDate.setText(intentFromAnimalInfoActivity.getStringExtra(KEY_DATE));
-            checkBoxChip.setChecked(intentFromAnimalInfoActivity
-                    .getBooleanExtra(KEY_CHIP, false));
-        } else {
-            setTitle("Regist Animal");
-        }
-
-
         textViewName = findViewById(R.id.txtName);
         textViewType = findViewById(R.id.txtType);
         textViewAge = findViewById(R.id.txtAge);
         textViewDate = findViewById(R.id.txtDate);
-        imageViewPhoto = findViewById(R.id.imgPhoto);
+        //imageViewPhoto = findViewById(R.drawable.);
         checkBoxChip = findViewById(R.id.chkboxChip);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        animalViewModel = ViewModelProviders.of(this).get(AnimalViewModel.class);
+        LiveData<List<Animal>> animalList = animalViewModel.getAllAnimals();
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(KEY_ID)) {
+            for (Animal animal : animalList) {
+                if (animal.getId() == intent.getIntExtra(KEY_ID, 0))
+                    setTitle("Edit Animal");
+                fill(animal.getName(), animal.getType(), animal.getAge(),
+                        animal.getDate(), animal.isChip());
+            }
+        } else {
+            setTitle("Regist Animal");
+        }
+
+        /*Intent intent = getIntent();
+        if (intent.hasExtra(KEY_ID)) {
+            setTitle("Edit Animal");
+            //animal = animalViewModel.getAnimal(getIntent().getIntExtra(KEY_ID, 0));
+        } else {
+            setTitle("Regist Animal");
+        }*/
+
+    }
+
+    public void fill(String name, String type, int age, String date, boolean chip) {
+        textViewName.setText(name);
+        textViewType.setText(type);
+        textViewAge.setText("" + age);
+        textViewDate.setText(date);
+        checkBoxChip.setChecked(chip);
+    }
+
+    public Animal updatedAnimal(Animal ani) {
+        if (!ani.getName().equals("")) {
+            ani.setName(textViewName.getText().toString());
+        }
+        if (!ani.getType().equals("")) {
+            ani.setType(textViewType.getText().toString());
+        }
+        if (ani.getAge() != 0) {
+            ani.setAge(Integer.parseInt(textViewAge.getText().toString()));
+        }
+        if (!ani.getDate().equals("")) {
+            ani.setDate(textViewDate.getText().toString());
+        }
+        if (!ani.isChip()) {
+            ani.setChip(ani.isChip());
+        }
+        //if (!ani.getName().equals("")){ ani.setName(textViewName.getText().toString());}
+
+        return new Animal(textViewName.getText().toString(),
+                textViewType.getText().toString(), textViewName.getText().toString(),
+                textViewDate.getText().toString(), (Integer.parseInt(textViewAge.getText().toString())),
+                checkBoxChip.isChecked());
+
     }
 
     private void saveAnimal() {
@@ -74,7 +128,7 @@ public class AddAnimalActivity extends AppCompatActivity {
         String animalType = textViewType.getText().toString();
         int animalAge = ageToInt();
         String animalDate = textViewDate.getText().toString();
-        String photo = "Placeholder String";
+        //String photo = "Placeholder String";
         boolean chip = hasChip();
 
         //form validator property
@@ -86,8 +140,20 @@ public class AddAnimalActivity extends AppCompatActivity {
                     .show();
             return;
         }
+        Intent intent = getIntent();
 
-        Intent data = new Intent();
+        if (intent.hasExtra(KEY_ID)) {
+            for (Animal animal : animalList) {
+                if (animal.getId() == intent.getIntExtra(KEY_ID, 0)) {
+                    Animal toStoreAnimal = updatedAnimal(animal);
+                    animalViewModel.update(toStoreAnimal);
+                    fill(animal.getName(), animal.getType(), animal.getAge(),
+                            animal.getDate(), animal.isChip());
+                    Toast.makeText(this, "Animal Updated!", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+        /*Intent data = new Intent();
         data.putExtra(KEY_NAME, animalName);
         data.putExtra(KEY_TYPE, animalType);
         data.putExtra(KEY_AGE, animalAge);
@@ -95,13 +161,15 @@ public class AddAnimalActivity extends AppCompatActivity {
         data.putExtra(KEY_PHOTO, photo);
         data.putExtra(KEY_CHIP, chip);
 
-        int id = getIntent().getIntExtra("id", -1);
+        int id = getIntent().getIntExtra(KEY_ID, -1);
+        System.out.println(""+id);
+        System.out.println(animalName);
         if (id != -1){
             data.putExtra(KEY_ID, id);
         }
 
         setResult(RESULT_OK, data);
-        finish();
+        finish();*/
     }
 
     @Override
