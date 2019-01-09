@@ -7,10 +7,10 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
 
+import com.itacademy.juangarcia.database_animal.Model.Animal;
 import com.itacademy.juangarcia.database_animal.R;
 
 public class AnimalInfoActivity extends AppCompatActivity {
-    public static final int UPDATE_ANIMAL_REQUEST = 2;
 
     EditText editTextName, editTextType, editTextAge, editTextDate;
     CheckBox chkboxChip;
@@ -25,32 +25,39 @@ public class AnimalInfoActivity extends AppCompatActivity {
         editTextDate = findViewById(R.id.txtDateInfo);
         editTextAge = findViewById(R.id.txtAgeInfo);
         chkboxChip = findViewById(R.id.chkboxChipInfo);
+
+        Intent animalFromMainactivityIntent = getIntent();
+        Bundle bundle =animalFromMainactivityIntent.getBundleExtra("bundle");
+        Animal currentAnimal = (Animal) bundle.getSerializable("animal");
+
+        fillInfo(currentAnimal);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        fillInfo();
+
     }
 
-    private void fillInfo() {
+    private void fillInfo(Animal currentAnimal) {
 
-        Intent intentFromMainActivity = getIntent();
-
-        editTextName.setText(intentFromMainActivity.getStringExtra("name"));
-        editTextType.setText(intentFromMainActivity.getStringExtra("type"));
-        editTextDate.setText(intentFromMainActivity.getStringExtra("date"));
-        editTextAge.setText(String.valueOf(intentFromMainActivity.getIntExtra("age", 0)));
-        chkboxChip.setChecked(intentFromMainActivity.getBooleanExtra("chip", false));
+        editTextName.setText(currentAnimal.getName());
+        editTextType.setText(currentAnimal.getType());
+        editTextDate.setText(currentAnimal.getDate());
+        editTextAge.setText(String.valueOf(currentAnimal.getAge()));
+        chkboxChip.setChecked(currentAnimal.isChip());
     }
 
     public void updateAnimal(View view) {
-
-        int id = getIntent().getIntExtra("id", 0);
+        Intent animalFromMainactivityIntent = getIntent();
+        Bundle bundle = animalFromMainactivityIntent.getBundleExtra("bundle");
+        Animal animal = (Animal) bundle.getSerializable("animal");
 
         Intent intentToAddAnimal = new Intent(AnimalInfoActivity.this, AddAnimalActivity.class);
-
-        intentToAddAnimal.putExtra(AddAnimalActivity.KEY_ID, id);
+        Bundle bundleReturn = new Bundle();
+        bundleReturn.putSerializable("animal",animal);
+        intentToAddAnimal.putExtra("bundle", bundle);
+        intentToAddAnimal.putExtra("id",animal.getId());
 
         startActivity(intentToAddAnimal);
     }

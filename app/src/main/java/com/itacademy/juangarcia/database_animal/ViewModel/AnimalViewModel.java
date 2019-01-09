@@ -23,8 +23,6 @@ public class AnimalViewModel extends AndroidViewModel {
 
     public LiveData<List<Animal>> getAllAnimals(){ return allAnimals; }
 
-    public Animal getAnimal(int id) { return repository.getAnimal(id); }
-
     public void insert(Animal animal){ repository.insert(animal); }
 
     public void update(Animal animal){ repository.update(animal); }

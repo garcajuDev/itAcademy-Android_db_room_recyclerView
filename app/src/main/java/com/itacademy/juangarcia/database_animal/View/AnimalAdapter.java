@@ -72,7 +72,9 @@ public class AnimalAdapter extends RecyclerView.Adapter<AnimalAdapter.Animalhold
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
                     int i = getAdapterPosition();
+
                     if (listener != null && i != RecyclerView.NO_POSITION) {
                         listener.onItemClick(animalsList.get(i));
                     }

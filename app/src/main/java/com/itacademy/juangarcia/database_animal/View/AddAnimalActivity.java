@@ -1,9 +1,8 @@
 package com.itacademy.juangarcia.database_animal.View;
 
 import android.app.DatePickerDialog;
-import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.Intent;
+import android.content.Intent;;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,25 +19,9 @@ import com.itacademy.juangarcia.database_animal.Model.Animal;
 import com.itacademy.juangarcia.database_animal.R;
 import com.itacademy.juangarcia.database_animal.ViewModel.AnimalViewModel;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
+import java.util.Calendar;;
 
 public class AddAnimalActivity extends AppCompatActivity {
-    public static final String KEY_ID =
-            "com.itacademy.juangarcia.database_animal.View.KEY_ID";
-    public static final String KEY_NAME =
-            "com.itacademy.juangarcia.database_animal.View.KEY_NAME";
-    public static final String KEY_TYPE =
-            "com.itacademy.juangarcia.database_animal.View.KEY_TYPE";
-    public static final String KEY_AGE =
-            "com.itacademy.juangarcia.database_animal.View.KEY_AGE";
-    public static final String KEY_DATE =
-            "com.itacademy.juangarcia.database_animal.View.KEY_DATE";
-    public static final String KEY_PHOTO =
-            "com.itacademy.juangarcia.database_animal.View.KEY_PHOTO";
-    public static final String KEY_CHIP =
-            "com.itacademy.juangarcia.database_animal.View.KEY_CHIP";
 
     AnimalViewModel animalViewModel;
     TextView textViewName, textViewType, textViewAge, textViewDate;
@@ -66,38 +49,29 @@ public class AddAnimalActivity extends AppCompatActivity {
         super.onResume();
 
         animalViewModel = ViewModelProviders.of(this).get(AnimalViewModel.class);
-        LiveData<List<Animal>> animalList = animalViewModel.getAllAnimals();
 
-        Intent intent = getIntent();
-        if (intent.hasExtra(KEY_ID)) {
-            for (Animal animal : animalList) {
-                if (animal.getId() == intent.getIntExtra(KEY_ID, 0))
-                    setTitle("Edit Animal");
-                fill(animal.getName(), animal.getType(), animal.getAge(),
-                        animal.getDate(), animal.isChip());
-            }
-        } else {
-            setTitle("Regist Animal");
-        }
-
-        /*Intent intent = getIntent();
-        if (intent.hasExtra(KEY_ID)) {
+        //regain the animal that be to update from AnimalInfoAcitvity
+        Intent animalActivity = getIntent();
+        if (animalActivity.hasExtra("id")) {
             setTitle("Edit Animal");
-            //animal = animalViewModel.getAnimal(getIntent().getIntExtra(KEY_ID, 0));
-        } else {
-            setTitle("Regist Animal");
-        }*/
-
+            Bundle bundle = animalActivity.getBundleExtra("bundle");
+            Animal currentAnimal = (Animal) bundle.getSerializable("animal");
+            fill(currentAnimal);
+        }else{
+            setTitle("New Animal");
+        }
     }
 
-    public void fill(String name, String type, int age, String date, boolean chip) {
-        textViewName.setText(name);
-        textViewType.setText(type);
-        textViewAge.setText("" + age);
-        textViewDate.setText(date);
-        checkBoxChip.setChecked(chip);
+    //fill the views values with the animal properties to update
+    public void fill(Animal animal) {
+        textViewName.setText(animal.getName());
+        textViewType.setText(animal.getType());
+        textViewAge.setText(String.valueOf(animal.getAge()));
+        textViewDate.setText(animal.getDate());
+        checkBoxChip.setChecked(animal.isChip());
     }
 
+    //no properties with empty values in the updated animal
     public Animal updatedAnimal(Animal ani) {
         if (!ani.getName().equals("")) {
             ani.setName(textViewName.getText().toString());
@@ -105,30 +79,25 @@ public class AddAnimalActivity extends AppCompatActivity {
         if (!ani.getType().equals("")) {
             ani.setType(textViewType.getText().toString());
         }
-        if (ani.getAge() != 0) {
+        if (ani.getAge() > 0) {
             ani.setAge(Integer.parseInt(textViewAge.getText().toString()));
         }
         if (!ani.getDate().equals("")) {
             ani.setDate(textViewDate.getText().toString());
         }
         if (!ani.isChip()) {
-            ani.setChip(ani.isChip());
+            ani.setChip(checkBoxChip.isChecked());
         }
-        //if (!ani.getName().equals("")){ ani.setName(textViewName.getText().toString());}
-
-        return new Animal(textViewName.getText().toString(),
-                textViewType.getText().toString(), textViewName.getText().toString(),
-                textViewDate.getText().toString(), (Integer.parseInt(textViewAge.getText().toString())),
-                checkBoxChip.isChecked());
-
+        return ani;
     }
 
+    //stores a new or updated animal in DB
     private void saveAnimal() {
         String animalName = textViewName.getText().toString();
         String animalType = textViewType.getText().toString();
         int animalAge = ageToInt();
         String animalDate = textViewDate.getText().toString();
-        //String photo = "Placeholder String";
+        String photo = "Placeholder String";
         boolean chip = hasChip();
 
         //form validator property
@@ -140,36 +109,27 @@ public class AddAnimalActivity extends AppCompatActivity {
                     .show();
             return;
         }
-        Intent intent = getIntent();
 
-        if (intent.hasExtra(KEY_ID)) {
-            for (Animal animal : animalList) {
-                if (animal.getId() == intent.getIntExtra(KEY_ID, 0)) {
-                    Animal toStoreAnimal = updatedAnimal(animal);
-                    animalViewModel.update(toStoreAnimal);
-                    fill(animal.getName(), animal.getType(), animal.getAge(),
-                            animal.getDate(), animal.isChip());
-                    Toast.makeText(this, "Animal Updated!", Toast.LENGTH_SHORT).show();
-                }
-            }
+        Intent animalActivity = getIntent();
+
+        //Update existing Animal in DB
+        if (animalActivity.hasExtra("id")) {
+            Bundle bundle = animalActivity.getBundleExtra("bundle");
+            Animal currentAnimal = (Animal) bundle.getSerializable("animal");
+
+            Animal animalUpdated = updatedAnimal(currentAnimal);
+            animalViewModel.update(animalUpdated);
+
+            Intent navToMain = new Intent(this, MainActivity.class);
+            startActivity(navToMain);
+            //Create and stores a new Animal in DB
+        } else {
+            setTitle("New Animal");
+            Animal toStoreAnimal = new Animal(animalName, photo, animalType,
+                    animalDate, animalAge, chip);
+            animalViewModel.insert(toStoreAnimal);
         }
-        /*Intent data = new Intent();
-        data.putExtra(KEY_NAME, animalName);
-        data.putExtra(KEY_TYPE, animalType);
-        data.putExtra(KEY_AGE, animalAge);
-        data.putExtra(KEY_DATE, animalDate);
-        data.putExtra(KEY_PHOTO, photo);
-        data.putExtra(KEY_CHIP, chip);
-
-        int id = getIntent().getIntExtra(KEY_ID, -1);
-        System.out.println(""+id);
-        System.out.println(animalName);
-        if (id != -1){
-            data.putExtra(KEY_ID, id);
-        }
-
-        setResult(RESULT_OK, data);
-        finish();*/
+        finish();
     }
 
     @Override

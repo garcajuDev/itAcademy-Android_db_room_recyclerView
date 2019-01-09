@@ -5,8 +5,10 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+import java.io.Serializable;
+
 @Entity(tableName = "animal_table")
-public class Animal {
+public class Animal implements Serializable {
 
     @PrimaryKey(autoGenerate = true)
     @NonNull

@@ -23,8 +23,6 @@ import com.itacademy.juangarcia.database_animal.ViewModel.AnimalViewModel;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    public static final int ADD_ANIMAL_REQUEST = 1;
-    public static final int EDIT_ANIMAL_REQUEST = 2;
 
     private AnimalViewModel animalViewModel;
 
@@ -67,16 +65,12 @@ public class MainActivity extends AppCompatActivity {
         adapter.setOnItemClickListener(new AnimalAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(Animal animal) {
-                Intent intent = new Intent(MainActivity.this,
+                Intent toInfoActivity = new Intent(MainActivity.this,
                         AnimalInfoActivity.class);
-                intent.putExtra("id", animal.getId());
-                intent.putExtra("name", animal.getName());
-                intent.putExtra("type", animal.getType());
-                intent.putExtra("age", animal.getAge());
-                intent.putExtra("date", animal.getDate());
-                intent.putExtra("photo", animal.getPhoto());
-                intent.putExtra("chip", animal.isChip());
-                startActivityForResult(intent, EDIT_ANIMAL_REQUEST);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("animal",animal);
+                toInfoActivity.putExtra("bundle",bundle);
+                startActivity(toInfoActivity);
             }
         });
     }
@@ -102,46 +96,6 @@ public class MainActivity extends AppCompatActivity {
 
     public void addAnimal(View view) {
         Intent intent = new Intent(MainActivity.this, AddAnimalActivity.class);
-        startActivityForResult(intent, ADD_ANIMAL_REQUEST);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == ADD_ANIMAL_REQUEST && resultCode == RESULT_OK) {
-            String name = data.getStringExtra(AddAnimalActivity.KEY_NAME);
-            String type = data.getStringExtra(AddAnimalActivity.KEY_TYPE);
-            int age = data.getIntExtra(AddAnimalActivity.KEY_AGE, 1);
-            String date = data.getStringExtra(AddAnimalActivity.KEY_DATE);
-            String photo = data.getStringExtra(AddAnimalActivity.KEY_PHOTO);
-            boolean chip = data.getBooleanExtra(AddAnimalActivity.KEY_CHIP, true);
-
-            Animal animal = new Animal(name, photo, type, date, age, chip);
-
-            animalViewModel.insert(animal);
-
-            Toast.makeText(this, "animal saved!", Toast.LENGTH_LONG).show();
-        } else if (requestCode == EDIT_ANIMAL_REQUEST && resultCode == RESULT_OK){
-            int id = data.getIntExtra(AddAnimalActivity.KEY_ID, -1);
-            System.out.println(""+id);
-            if (id == -1) {
-                Toast.makeText(this, "Animal can't be updated!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            String name = data.getStringExtra(AddAnimalActivity.KEY_NAME);
-            System.out.println(name);
-            String type = data.getStringExtra(AddAnimalActivity.KEY_TYPE);
-            int age = data.getIntExtra(AddAnimalActivity.KEY_AGE, 1);
-            String date = data.getStringExtra(AddAnimalActivity.KEY_DATE);
-            String photo = data.getStringExtra(AddAnimalActivity.KEY_PHOTO);
-            boolean chip = data.getBooleanExtra(AddAnimalActivity.KEY_CHIP, true);
-
-            Animal animal = new Animal(name, photo, type, date, age, chip);
-            animal.setId(id);
-            animalViewModel.update(animal);
-        } else {
-            Toast.makeText(this, "animal not saved!", Toast.LENGTH_LONG).show();
-        }
+        startActivity(intent);
     }
 }

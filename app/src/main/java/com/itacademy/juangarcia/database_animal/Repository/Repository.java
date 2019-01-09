@@ -25,8 +25,6 @@ public class Repository {
         return allAnimals;
     }
 
-    public Animal getAnimal(int id){ return dao.getAnimal(id); }
-
     public void insert (Animal animal){
         new insertAsyncTask(dao).execute(animal);
     }

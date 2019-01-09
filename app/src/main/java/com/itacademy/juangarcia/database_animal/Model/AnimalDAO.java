@@ -18,9 +18,6 @@ public interface AnimalDAO {
     @Update
     void update(Animal animal);
 
-    @Query("SELECT * FROM animal_table WHERE id == :animalId")
-    Animal getAnimal(int animalId);
-
     @Query("select * from animal_table")
     LiveData<List<Animal>> getAllAnmals();
 
