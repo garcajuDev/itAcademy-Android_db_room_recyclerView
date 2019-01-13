@@ -3,8 +3,12 @@ package com.itacademy.juangarcia.database_animal.View;
 import android.app.DatePickerDialog;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -19,10 +23,14 @@ import com.itacademy.juangarcia.database_animal.Model.Animal;
 import com.itacademy.juangarcia.database_animal.R;
 import com.itacademy.juangarcia.database_animal.ViewModel.AnimalViewModel;
 
-import java.util.Calendar;;
+import java.io.ByteArrayOutputStream;
+import java.util.Calendar;
+import java.util.Objects;;
 
 public class AddAnimalActivity extends AppCompatActivity {
 
+    final int CAMERA = 1;
+    String photo = "Placeholder String";
     AnimalViewModel animalViewModel;
     TextView textViewName, textViewType, textViewAge, textViewDate;
     CheckBox checkBoxChip;
@@ -40,7 +48,7 @@ public class AddAnimalActivity extends AppCompatActivity {
         textViewType = findViewById(R.id.txtType);
         textViewAge = findViewById(R.id.txtAge);
         textViewDate = findViewById(R.id.txtDate);
-        //imageViewPhoto = findViewById(R.drawable.);
+        imageViewPhoto = findViewById(R.id.imgPhoto);
         checkBoxChip = findViewById(R.id.chkboxChip);
     }
 
@@ -60,11 +68,14 @@ public class AddAnimalActivity extends AppCompatActivity {
         }else{
             setTitle("New Animal");
         }
+
+
     }
 
     //fill the views values with the animal properties to update
     public void fill(Animal animal) {
         textViewName.setText(animal.getName());
+        imageViewPhoto.setImageBitmap(bse64ToBitmap(animal.getPhoto()));
         textViewType.setText(animal.getType());
         textViewAge.setText(String.valueOf(animal.getAge()));
         textViewDate.setText(animal.getDate());
@@ -75,6 +86,9 @@ public class AddAnimalActivity extends AppCompatActivity {
     public Animal updatedAnimal(Animal ani) {
         if (!ani.getName().equals("")) {
             ani.setName(textViewName.getText().toString());
+        }
+        if (!ani.getPhoto().equals("")) {
+            ani.setPhoto(photo);
         }
         if (!ani.getType().equals("")) {
             ani.setType(textViewType.getText().toString());
@@ -97,7 +111,6 @@ public class AddAnimalActivity extends AppCompatActivity {
         String animalType = textViewType.getText().toString();
         int animalAge = ageToInt();
         String animalDate = textViewDate.getText().toString();
-        String photo = "Placeholder String";
         boolean chip = hasChip();
 
         //form validator property
@@ -196,5 +209,33 @@ public class AddAnimalActivity extends AppCompatActivity {
         } else {
             return false;
         }
+    }
+
+    public void doPhoto(View view) {
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(cameraIntent, CAMERA);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAMERA && resultCode == RESULT_OK) {
+            Bitmap photobmp = (Bitmap) data.getExtras().get("data");
+            imageViewPhoto.setImageBitmap(photobmp);
+            photo = bitmapToBase64(photobmp);
+        }
+    }
+
+    private String bitmapToBase64(Bitmap photobmp) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        photobmp.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+        byte[] byteArray = byteArrayOutputStream .toByteArray();
+
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+    private Bitmap bse64ToBitmap(String txtphoto) {
+        byte[] imageAsBytes = Base64.decode(txtphoto.getBytes(), Base64.DEFAULT);
+        return BitmapFactory.decodeByteArray(imageAsBytes, 0, imageAsBytes.length);
     }
 }

@@ -18,7 +18,7 @@ public interface AnimalDAO {
     @Update
     void update(Animal animal);
 
-    @Query("select * from animal_table")
+    @Query("select * from animal_table order by id desc")
     LiveData<List<Animal>> getAllAnmals();
 
     @Query("delete from animal_table")
